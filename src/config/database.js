@@ -1,47 +1,56 @@
+// Imports
 import dotenv from 'dotenv';
-dotenv.config();
 import { Sequelize } from 'sequelize';
+import logger from '../common/logger.js';
 
-// Initialize Sequelize
+// Env
+dotenv.config();
+
+// Helpers
+const toInt = (v, d) => {
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : d;
+};
+
+// Sequelize instance
 const sequelize = new Sequelize(
   process.env.DB_NAME || '',
   process.env.DB_USER || '',
   process.env.DB_PASSWORD || '',
   {
-    host: process.env.DB_HOST || '',
-    port: process.env.DB_PORT || 5432,
+    host: process.env.DB_HOST || 'localhost',
+    port: toInt(process.env.DB_PORT, 5432),
     dialect: process.env.DB_DIALECT || 'postgres',
-    logging: process.env.DB_LOGGING === 'true',
+    logging: process.env.DB_LOGGING === 'true' ? (msg) => logger.debug(msg) : false,
     pool: {
-      max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-      min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-      acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-      idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000,
+      max: toInt(process.env.DB_POOL_MAX, 10),
+      min: toInt(process.env.DB_POOL_MIN, 0),
+      acquire: toInt(process.env.DB_POOL_ACQUIRE, 30000),
+      idle: toInt(process.env.DB_POOL_IDLE, 10000),
     },
   }
 );
-// Authenticate and test the connection
+
+// Test connection
 async function testConnection() {
   try {
     await sequelize.authenticate();
-    console.log('Database connection has been established successfully.');
+    logger.info('Database connection has been established successfully.');
   } catch (err) {
-    console.error('Unable to connect to the database:', err);
+    logger.error('Unable to connect to the database', { error: err?.message });
   }
 }
 
-// Sync models (if any) - in production, consider using migrations instead
+// Sync models (consider migrations in production)
 async function syncModels() {
   try {
     await sequelize.sync({ alter: true });
-    console.log('All models were synchronized successfully.');
+    logger.info('All models were synchronized successfully.');
   } catch (err) {
-    console.error('An error occurred while synchronizing the models:', err);
+    logger.error('Error while synchronizing the models', { error: err?.message });
   }
 }
 
-export default {
-  sequelize,
-  testConnection,
-  syncModels,
-};
+// Exports
+export { sequelize, testConnection, syncModels };
+export default { sequelize, testConnection, syncModels };
