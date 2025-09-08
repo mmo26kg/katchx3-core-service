@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --check",
-    "format:write": "prettier . --write",
+    "format:fix": "prettier . --write",
     "prepare": "husky",
     "test": "node test/health.test.js",
     "test:health": "node test/health.test.js"

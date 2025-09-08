@@ -3,6 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import logger from './common/logger.js';
+import ApiResponse, { ok, fail, notFound } from './common/helper/api.response.js';
 import allModules from './modules/allModules.js';
 
 // App
@@ -27,15 +28,15 @@ Object.values(allModules).forEach((mod) => {
 
 // Routes
 app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+  ok('OK').send(res);
 });
 
 // 404 and error handlers
-app.use((req, res) => res.status(404).send('Not Found'));
+app.use((req, res) => notFound('Not Found').send(res));
 
 app.use((err, req, res, next) => {
   logger.error('Unhandled error in request', { error: err?.message });
-  res.status(500).send('Internal Server Error');
+  serverError('Internal Server Error', err).send(res);
 });
 
 export default app;
