@@ -12,12 +12,9 @@ const toInt = (v, d) => {
   return Number.isFinite(n) ? n : d;
 };
 
-// Sequelize instance
-const sequelize = new Sequelize(
-  process.env.DB_NAME || '',
-  process.env.DB_USER || '',
-  process.env.DB_PASSWORD || '',
-  {
+// Build Sequelize options and factory (no direct instance here)
+function getSequelizeOptions() {
+  return {
     host: process.env.DB_HOST || 'localhost',
     port: toInt(process.env.DB_PORT, 5432),
     dialect: process.env.DB_DIALECT || 'postgres',
@@ -28,11 +25,20 @@ const sequelize = new Sequelize(
       acquire: toInt(process.env.DB_POOL_ACQUIRE, 30000),
       idle: toInt(process.env.DB_POOL_IDLE, 10000),
     },
-  }
-);
+  };
+}
+
+function createSequelize() {
+  return new Sequelize(
+    process.env.DB_NAME || '',
+    process.env.DB_USER || '',
+    process.env.DB_PASSWORD || '',
+    getSequelizeOptions()
+  );
+}
 
 // Test connection
-async function testConnection() {
+async function testConnection(sequelize) {
   try {
     await sequelize.authenticate();
     logger.info('Database connection has been established successfully.');
@@ -42,7 +48,7 @@ async function testConnection() {
 }
 
 // Sync models (consider migrations in production)
-async function syncModels() {
+async function syncModels(sequelize) {
   try {
     await sequelize.sync({ alter: true });
     logger.info('All models were synchronized successfully.');
@@ -52,5 +58,4 @@ async function syncModels() {
 }
 
 // Exports
-export { sequelize, testConnection, syncModels };
-export default { sequelize, testConnection, syncModels };
+export default { createSequelize, testConnection, syncModels };
