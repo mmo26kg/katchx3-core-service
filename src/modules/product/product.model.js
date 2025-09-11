@@ -4,16 +4,16 @@ import { DataTypes } from 'sequelize';
 import defaultModelOptions from '../../common/interface/base.model.js';
 
 export const Product = sequelize.define(
-  'product',
-  {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    'product',
+    {
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
     },
-  },
-  {
-    ...defaultModelOptions,
-  }
+    {
+        ...defaultModelOptions,
+    }
 );
 
 export default Product;

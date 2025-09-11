@@ -18,7 +18,7 @@ app.use(morgan(morganFormat, { stream: logger.stream }));
 
 // Routes
 app.get('/health', (req, res) => {
-  ok('OK').send(res);
+    ok('OK').send(res);
 });
 
 export default app;

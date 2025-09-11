@@ -10,10 +10,10 @@ const res = await fetch(`http://127.0.0.1:${port}/health`);
 const body = await res.text();
 
 if (res.status === 200 && body.trim() === 'OK') {
-  logger.info('Health check: PASS');
+    logger.info('Health check: PASS');
 } else {
-  logger.error(`Health check: FAIL (status=${res.status}, body='${body.trim()}')`);
-  process.exitCode = 1;
+    logger.error(`Health check: FAIL (status=${res.status}, body='${body.trim()}')`);
+    process.exitCode = 1;
 }
 
 server.close();

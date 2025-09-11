@@ -9,33 +9,33 @@ let initialized = false;
 let cachedRouter = null;
 
 function initOnce() {
-  if (initialized) return;
+    if (initialized) return;
 
-  // Resolve sequelize after main.js registers it in DI
-  const sequelize = DIContainer.resolve('sequelize');
+    // Resolve sequelize after main.js registers it in DI
+    const sequelize = DIContainer.resolve('sequelize');
 
-  // Ensure model is defined once per sequelize instance
-  const userModel = sequelize.models.User || defineUserModel(sequelize);
+    // Ensure model is defined once per sequelize instance
+    const userModel = sequelize.models.User || defineUserModel(sequelize);
 
-  // Build service and controller
-  const userService = new UserService(userModel);
-  const router = express.Router();
-  cachedRouter = UserController(router, userService);
+    // Build service and controller
+    const userService = new UserService(userModel);
+    const router = express.Router();
+    cachedRouter = UserController(router, userService);
 
-  initialized = true;
+    initialized = true;
 }
 
 const UserModule = {
-  getController() {
-    initOnce();
-    return cachedRouter;
-  },
-  getBasePath() {
-    return '/users';
-  },
-  getName() {
-    return 'UserModule';
-  },
+    getController() {
+        initOnce();
+        return cachedRouter;
+    },
+    getBasePath() {
+        return '/users';
+    },
+    getName() {
+        return 'UserModule';
+    },
 };
 
 export default UserModule;

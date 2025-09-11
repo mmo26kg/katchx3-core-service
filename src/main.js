@@ -27,14 +27,14 @@ await db.syncModels(sequelize);
 // 404 and error handlers (register last)
 app.use((req, res) => notFound('Not Found').send(res));
 app.use((err, req, res, next) => {
-  logger.error('Unhandled error in request', { error: err?.message });
-  serverError('Internal Server Error', err).send(res);
+    logger.error('Unhandled error in request', { error: err?.message });
+    serverError('Internal Server Error', err).send(res);
 });
 
 // Server
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost';
 app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-  logger.info(`Connect to ${BASE_URL}:${PORT}/health to check health`);
+    logger.info(`Server is running on port ${PORT}`);
+    logger.info(`Connect to ${BASE_URL}:${PORT}/health to check health`);
 });

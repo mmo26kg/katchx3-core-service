@@ -1,6 +1,6 @@
 const defaultModelOptions = {
-  timestamps: true,
-  paranoid: true,
+    timestamps: true,
+    paranoid: true,
 };
 
 export default defaultModelOptions;
