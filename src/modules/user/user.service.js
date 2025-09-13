@@ -3,7 +3,7 @@ import userModuleConfig from './user.config.js';
 
 class UserService extends BaseService {
     constructor() {
-        super(userModuleConfig.tableName);
+        super();
     }
 
     async getActiveUsers(options = {}) {

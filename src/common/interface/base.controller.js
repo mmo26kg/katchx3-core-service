@@ -46,14 +46,17 @@ export default class BaseController {
             }
         });
 
+        const cap = (s) =>
+            typeof s === 'string' && s.length ? s[0].toUpperCase() + s.slice(1) : s;
+
         router.get(`/:id`, async (req, res) => {
             try {
                 const item = await this.service.getById(req.params.id);
                 if (!item) {
                     this.logger.warn(
-                        `${this.singularizedName.capitalize()} ID: ${req.params.id} not found`
+                        `${cap(this.singularizedName)} ID: ${req.params.id} not found`
                     );
-                    return notFound(`${this.singularizedName.capitalize()} not found`).send(res);
+                    return notFound(`${cap(this.singularizedName)} not found`).send(res);
                 }
                 return ok(item).send(res);
             } catch (error) {

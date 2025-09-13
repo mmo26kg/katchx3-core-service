@@ -4,7 +4,22 @@ import morgan from 'morgan';
 
 export function createApp() {
     const app = express();
-    const logger = container.get('logger');
+
+    // Get logger from DI if available; otherwise fallback to console
+    let logger;
+    try {
+        logger = container.get('logger');
+    } catch {
+        const fallback = {
+            info: (...args) => console.log('[info]', ...args),
+            warn: (...args) => console.warn('[warn]', ...args),
+            error: (...args) => console.error('[error]', ...args),
+            debug: (...args) => console.debug('[debug]', ...args),
+        };
+        fallback.stream = { write: (msg) => fallback.info(msg.trim()) };
+        logger = fallback;
+    }
+
     // Middlewares
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
@@ -20,9 +35,16 @@ export function createApp() {
         })
     );
 
-    // Load modules that may depend on DI-registered dependencies
-    const userModule = container.get('userModule');
-    userModule.initApp(app);
+    // Basic health endpoint (no DB/DI required)
+    app.get('/health', (_req, res) => {
+        res.status(200).send('OK');
+    });
+
+    // Load modules if registered (skip silently if DI not ready)
+    try {
+        const userModule = container.get('userModule');
+        userModule.initApp(app);
+    } catch {}
 
     return app;
 }

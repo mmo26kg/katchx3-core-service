@@ -1,6 +1,5 @@
 export default class BaseModuleConfig {
     constructor({
-        moduleName,
         tableName,
         serviceName,
         controllerName,
@@ -8,7 +7,6 @@ export default class BaseModuleConfig {
         pluralizedName,
         basePath,
     }) {
-        if (!moduleName) throw new Error('BaseModuleConfig requires a moduleName');
         if (!tableName) throw new Error('BaseModuleConfig requires a tableName');
         if (!serviceName) throw new Error('BaseModuleConfig requires a serviceName');
         if (!controllerName) throw new Error('BaseModuleConfig requires a controllerName');
@@ -16,7 +14,6 @@ export default class BaseModuleConfig {
         if (!pluralizedName) throw new Error('BaseModuleConfig requires a pluralizedName');
         if (!basePath) throw new Error('BaseModuleConfig requires a basePath');
 
-        this.moduleName = moduleName;
         this.tableName = tableName;
         this.serviceName = serviceName;
         this.controllerName = controllerName;
