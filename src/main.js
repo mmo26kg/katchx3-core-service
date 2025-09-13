@@ -43,7 +43,8 @@ import container from './common/helper/di-container.js';
 import Logger from './common/helper/logger.js';
 import { createApp } from './app.js';
 import db from './config/database.js';
-import UserModule from './modules/user/user.module.js';
+// import UserModule from './modules/user/user.module.js';
+import registerAllModules from './modules/allModules.js';
 
 async function main() {
     try {
@@ -51,7 +52,8 @@ async function main() {
         container.register('logger', () => new Logger());
         container.registerFactory('sequelize', db.createSequelize);
         container.registerFactory('app', createApp);
-        container.register('userModule', () => new UserModule());
+        // container.register('userModule', () => new UserModule());
+        registerAllModules();
 
         // Get dependencies
         const logger = container.get('logger');

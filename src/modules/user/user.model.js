@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 
-// User model definition
 function defineUserModel(sequelize) {
     const User = sequelize.define('User', {
         username: {
@@ -10,6 +9,7 @@ function defineUserModel(sequelize) {
         },
         email: {
             type: DataTypes.STRING,
+            validate: { isEmail: true },
             allowNull: false,
             unique: true,
         },

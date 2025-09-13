@@ -1,38 +1,3 @@
-// function UserService(userModel) {
-//     if (!userModel) {
-//         throw new Error('User model is required');
-//     }
-
-//     this.listAndCount = async (options = {}) => {
-//         return userModel.findAndCountAll(options);
-//     };
-
-//     this.count = async (options = {}) => {
-//         return userModel.count(options);
-//     };
-
-//     this.getById = async (id, options = {}) => {
-//         return userModel.findByPk(id, options);
-//     };
-
-//     this.create = async (data, options = {}) => {
-//         return userModel.create(data, options);
-//     };
-
-//     this.update = async (id, data, options = {}) => {
-//         const item = await this.getById(id, options);
-//         if (!item) return null;
-//         return item.update(data, options);
-//     };
-
-//     this.delete = async (id, options = {}) => {
-//         const count = await userModel.destroy({ where: { id }, ...options });
-//         return count > 0;
-//     };
-// }
-
-// export default UserService;
-
 import container from '../../common/helper/di-container.js';
 
 class UserService {
@@ -40,6 +5,7 @@ class UserService {
         this.logger = container.get('logger');
         this.sequelize = container.get('sequelize');
     }
+
     async listAndCount(options = {}) {
         this.logger.info('Listing and counting users with options:', options);
         return this.sequelize.models.User.findAndCountAll(options);
@@ -54,7 +20,12 @@ class UserService {
     }
     async create(data, options = {}) {
         this.logger.info('Creating new user with data:', data);
-        return this.sequelize.models.User.create(data, options);
+        const user = await this.sequelize.models.User.create(data, options);
+        if (!user) {
+            this.logger.error('User creation failed');
+            throw new Error('User creation failed');
+        }
+        return user;
     }
     async update(id, data, options = {}) {
         this.logger.info(`Updating user ID: ${id} with data:`, data);

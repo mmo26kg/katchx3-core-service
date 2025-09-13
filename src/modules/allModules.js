@@ -1,4 +1,10 @@
-import ProductModule from './product/product.module.js';
+// import ProductModule from './product/product.module.js';
 import UserModule from './user/user.module.js';
+import container from '../common/helper/di-container.js';
 
-export default { ProductModule, UserModule };
+function registerAllModules() {
+    // container.register('productModule', () => new ProductModule());
+    container.register('userModule', () => new UserModule());
+}
+
+export default registerAllModules;
