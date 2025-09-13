@@ -1,72 +1,106 @@
-// Base CRUD routes with simple override option
-// Usage:
-//   baseRoute(router, service, 'Product')
-//   baseRoute(router, service, 'Product', { list: (req,res)=>{...} })
-
+import container from '../helper/di-container.js';
+import { ok, fail, notFound, created } from '../helper/api.response.js';
 import buildOptions from '../helper/buildOptions.js';
-import ApiResponse, { ok, created, fail } from '../helper/api.response.js';
 
-const baseRoute = (router, service, entityName, overrides = {}) => {
-    const wrap = (fn) => async (req, res, next) => {
-        try {
-            await fn(req, res, next);
-        } catch (err) {
-            next(err);
-        }
-    };
+export default class BaseController {
+    constructor(serviceName, moduleConfig) {
+        this.logger = container.get('logger');
+        this.service = container.get(serviceName);
+        this.basePath = moduleConfig.basePath;
+        this.singularizedName = moduleConfig.singularizedName;
+        this.pluralizedName = moduleConfig.pluralizedName;
+    }
 
-    const handlers = {
-        listAndCount: async (req, res) => {
-            const options = buildOptions(req.query);
-            const pageSize = options.limit ?? undefined;
-            const offset = options.offset ?? 0;
-            const page = pageSize ? Math.floor(offset / pageSize) + 1 : undefined;
+    attachRoutes(app) {
+        app.get(this.basePath, async (req, res) => {
+            try {
+                const options = buildOptions(req.query);
+                const result = await this.service.listAndCount(options);
+                return ok(result).send(res);
+            } catch (error) {
+                this.logger.error(`Failed to list ${this.pluralizedName}`, {
+                    error: error.message,
+                });
+                return fail(`Failed to list ${this.pluralizedName}`, error).send(res);
+            }
+        });
 
-            const { rows, count } = await service.listAndCount(options);
-            return ok(rows, {
-                total: count,
-                page,
-                pageSize,
-                offset,
-                hasNext: pageSize ? offset + rows.length < count : false,
-            }).send(res);
-        },
-        count: async (req, res) => {
-            const options = buildOptions(req.query);
-            const count = await service.count(options);
-            return ok({ count }).send(res);
-        },
+        app.get(`${this.basePath}/:id`, async (req, res) => {
+            try {
+                const item = await this.service.getById(req.params.id);
+                if (!item) {
+                    this.logger.warn(
+                        `${this.singularizedName.capitalize()} ID: ${req.params.id} not found`
+                    );
+                    return notFound(`${this.singularizedName.capitalize()} not found`).send(res);
+                }
+                return ok(item).send(res);
+            } catch (error) {
+                this.logger.error(`Failed to get ${this.singularizedName} ID: ${req.params.id}`, {
+                    error: error.message,
+                });
+                return fail(`Failed to get ${this.singularizedName}`, error).send(res);
+            }
+        });
 
-        getById: async (req, res) => {
-            const item = await service.getById(req.params.id);
-            if (!item) return fail(`${entityName} not found`).withStatus(404).send(res);
-            return ok(item).send(res);
-        },
-        create: async (req, res) => {
-            const created = await service.create(req.body);
-            return ApiResponse.created(created).send(res);
-        },
-        update: async (req, res) => {
-            const updated = await service.update(req.params.id, req.body);
-            if (!updated) return fail(`${entityName} not found`).withStatus(404).send(res);
-            return ok(updated).send(res);
-        },
-        delete: async (req, res) => {
-            const deleted = await service.delete(req.params.id);
-            if (!deleted) return fail(`${entityName} not found`).withStatus(404).send(res);
-            return ok(true).withStatus(200).send(res);
-        },
-        ...overrides,
-    };
+        app.post(this.basePath, async (req, res) => {
+            try {
+                const newItem = await this.service.create(req.body);
+                return created(newItem).send(res);
+            } catch (error) {
+                this.logger.error(`Failed to create ${this.singularizedName}`, {
+                    error: error.message,
+                    stack: error.stack,
+                    code: error.code,
+                });
+                return fail(`Failed to create ${this.singularizedName}`, error).send(res);
+            }
+        });
 
-    router.get('/', wrap(handlers.listAndCount));
-    router.get('/count', wrap(handlers.count));
-    router.get('/:id', wrap(handlers.getById));
-    router.post('/', wrap(handlers.create));
-    router.put('/:id', wrap(handlers.update));
-    router.delete('/:id', wrap(handlers.delete));
+        app.put(`${this.basePath}/:id`, async (req, res) => {
+            try {
+                const updatedItem = await this.service.update(req.params.id, req.body);
+                if (!updatedItem) {
+                    this.logger.warn(
+                        `${this.singularizedName} ID: ${req.params.id} not found for update`
+                    );
+                    return notFound(`${this.singularizedName} not found`).send(res);
+                }
+                return ok(updatedItem).send(res);
+            } catch (error) {
+                this.logger.error(
+                    `Failed to update ${this.singularizedName} ID: ${req.params.id}`,
+                    {
+                        error: error.message,
+                        stack: error.stack,
+                        code: error.code,
+                    }
+                );
+                return fail(`Failed to update ${this.singularizedName}`, error).send(res);
+            }
+        });
 
-    return router;
-};
-
-export default baseRoute;
+        app.delete(`${this.basePath}/:id`, async (req, res) => {
+            try {
+                const deleted = await this.service.delete(req.params.id);
+                if (!deleted) {
+                    this.logger.warn(
+                        `${this.singularizedName} ID: ${req.params.id} not found for deletion`
+                    );
+                    return notFound(`${this.singularizedName} not found`).send(res);
+                }
+                return ok(true).send(res);
+            } catch (error) {
+                this.logger.error(
+                    `Failed to delete ${this.singularizedName} ID: ${req.params.id}`,
+                    {
+                        error: error.message,
+                        stack: error.stack,
+                        code: error.code,
+                    }
+                );
+                return fail(`Failed to delete ${this.singularizedName}`, error).send(res);
+            }
+        });
+    }
+}

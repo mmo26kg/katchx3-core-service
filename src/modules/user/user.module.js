@@ -5,8 +5,8 @@ import UserController from './user.controller.js';
 
 class UserModule {
     constructor() {
-        container.register('userService', () => new UserService());
-        container.register('userController', () => new UserController());
+        container.registerClass('userService', UserService);
+        container.registerClass('userController', UserController);
 
         this.sequelize = container.get('sequelize');
         this.userController = container.get('userController');

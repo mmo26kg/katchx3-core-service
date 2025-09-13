@@ -31,6 +31,10 @@ const container = {
         this.dependencies[key] = { type: 'factory', fn: factory };
     },
 
+    registerClass(key, ClassDef) {
+        this.dependencies[key] = () => new ClassDef();
+    },
+
     get(key) {
         const dep = this.dependencies[key];
         if (!dep) {
@@ -58,6 +62,11 @@ const container = {
         // Cache instance
         this.instances[key] = instance;
         return instance;
+    },
+
+    reset() {
+        this.dependencies = {};
+        this.instances = {};
     },
 };
 

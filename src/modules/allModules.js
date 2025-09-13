@@ -4,7 +4,7 @@ import container from '../common/helper/di-container.js';
 
 function registerAllModules() {
     // container.register('productModule', () => new ProductModule());
-    container.register('userModule', () => new UserModule());
+    container.registerClass('userModule', UserModule);
 }
 
 export default registerAllModules;
