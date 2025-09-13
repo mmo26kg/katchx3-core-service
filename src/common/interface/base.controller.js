@@ -1,22 +1,43 @@
 import container from '../helper/di-container.js';
+import express from 'express';
 import { ok, fail, notFound, created } from '../helper/api.response.js';
 import buildOptions from '../helper/buildOptions.js';
 
 export default class BaseController {
-    constructor(serviceName, moduleConfig) {
+    constructor() {
         this.logger = container.get('logger');
-        this.service = container.get(serviceName);
-        this.basePath = moduleConfig.basePath;
-        this.singularizedName = moduleConfig.singularizedName;
-        this.pluralizedName = moduleConfig.pluralizedName;
+        this.configAddress = container.get('configAddress');
+        this.moduleConfig = container.get(this.configAddress);
+        this.service = container.get(this.moduleConfig.serviceName);
+        this.basePath = this.moduleConfig.basePath;
+        this.singularizedName = this.moduleConfig.singularizedName;
+        this.pluralizedName = this.moduleConfig.pluralizedName;
+    }
+
+    registerCustomRoutes(_router) {
+        // Override in subclass if needed
     }
 
     attachRoutes(app) {
-        app.get(this.basePath, async (req, res) => {
+        const router = express.Router();
+
+        this.registerCustomRoutes(router);
+
+        router.get(`/`, async (req, res) => {
             try {
                 const options = buildOptions(req.query);
                 const result = await this.service.listAndCount(options);
-                return ok(result).send(res);
+                return ok(result, {
+                    page: options.page,
+                    pageSize: options.pageSize,
+                    offset: options.offset,
+                    total: result.count,
+                    totalPages: Math.ceil(result.count / options.pageSize) || 1,
+                    hasNext: options.page * options.pageSize < result.count,
+                    hasPrevious: options.page > 1,
+                    sort: options.sort,
+                    filters: options.where,
+                }).send(res);
             } catch (error) {
                 this.logger.error(`Failed to list ${this.pluralizedName}`, {
                     error: error.message,
@@ -25,7 +46,7 @@ export default class BaseController {
             }
         });
 
-        app.get(`${this.basePath}/:id`, async (req, res) => {
+        router.get(`/:id`, async (req, res) => {
             try {
                 const item = await this.service.getById(req.params.id);
                 if (!item) {
@@ -43,7 +64,7 @@ export default class BaseController {
             }
         });
 
-        app.post(this.basePath, async (req, res) => {
+        router.post(`/`, async (req, res) => {
             try {
                 const newItem = await this.service.create(req.body);
                 return created(newItem).send(res);
@@ -57,7 +78,7 @@ export default class BaseController {
             }
         });
 
-        app.put(`${this.basePath}/:id`, async (req, res) => {
+        router.put(`/:id`, async (req, res) => {
             try {
                 const updatedItem = await this.service.update(req.params.id, req.body);
                 if (!updatedItem) {
@@ -80,7 +101,7 @@ export default class BaseController {
             }
         });
 
-        app.delete(`${this.basePath}/:id`, async (req, res) => {
+        router.delete(`/:id`, async (req, res) => {
             try {
                 const deleted = await this.service.delete(req.params.id);
                 if (!deleted) {
@@ -102,5 +123,7 @@ export default class BaseController {
                 return fail(`Failed to delete ${this.singularizedName}`, error).send(res);
             }
         });
+
+        app.use(this.basePath, router);
     }
 }

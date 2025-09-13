@@ -37,6 +37,10 @@ const buildOptions = (q = {}) => {
         if (offset !== undefined) opts.offset = offset;
     }
 
+    opts.page = page || 1;
+    opts.pageSize = pageSize || 0;
+    opts.sort = sort || [];
+
     // simple where filters from remaining keys
     const reserved = new Set(['fields', 'sort', 'order', 'page', 'pageSize', 'limit', 'offset']);
     const where = {};

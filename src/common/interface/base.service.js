@@ -1,9 +1,10 @@
 import container from '../helper/di-container.js';
 
 export default class BaseService {
-    constructor(modelName) {
-        if (!modelName) throw new Error('BaseService requires a modelName');
-        this.modelName = modelName;
+    constructor() {
+        this.configAddress = container.get('configAddress');
+        this.moduleConfig = container.get(this.configAddress);
+        this.modelName = this.moduleConfig.tableName;
         this.container = container;
         this.logger = this.container.get('logger');
         this._sequelize = null;

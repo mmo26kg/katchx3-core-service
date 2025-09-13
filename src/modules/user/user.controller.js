@@ -1,12 +1,26 @@
-// import buildOptions from '../../common/helper/buildOptions.js';
-// import { ok, created, fail, notFound } from '../../common/helper/api.response.js';
-// import container from '../../common/helper/di-container.js';
 import userModuleConfig from './user.config.js';
-import BaseController from '../../common/interface/base.route.js';
+import BaseController from '../../common/interface/base.controller.js';
+import { ok, fail } from '../../common/helper/api.response.js';
 
 class UserController extends BaseController {
     constructor() {
-        super('userService', userModuleConfig);
+        super();
+    }
+
+    // You can add user-specific controller methods here
+    registerCustomRoutes(router) {
+        router.get('/active', async (req, res) => {
+            try {
+                const options = buildOptions(req.query);
+                const activeUsers = await this.service.getActiveUsers(options);
+                return ok(activeUsers).send(res);
+            } catch (error) {
+                this.logger.error(`Failed to fetch active ${this.pluralizedName}`, {
+                    error: error.message,
+                });
+                return fail(`Failed to fetch active ${this.pluralizedName}`, error).send(res);
+            }
+        });
     }
 }
 
