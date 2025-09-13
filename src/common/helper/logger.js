@@ -36,21 +36,47 @@ const humanFormat = printf((info) => {
     return `${tsColored} ${lvlColored}: ${msg}${extra}`;
 });
 
-const logger = createLogger({
-    level,
-    transports: [
-        new transports.Console({
+class Logger {
+    constructor() {
+        this.logger = createLogger({
             level,
-            format: isProd
-                ? combine(timestamp(), errors({ stack: true }), splat(), json())
-                : combine(colorize(), timestamp(), errors({ stack: true }), splat(), humanFormat),
-        }),
-    ],
-});
+            transports: [
+                new transports.Console({
+                    level,
+                    format: isProd
+                        ? combine(timestamp(), errors({ stack: true }), splat(), json())
+                        : combine(
+                              colorize(),
+                              timestamp(),
+                              errors({ stack: true }),
+                              splat(),
+                              humanFormat
+                          ),
+                }),
+            ],
+        });
+    }
 
+    info(message, meta) {
+        this.logger.info(message, meta);
+    }
+
+    warn(message, meta) {
+        this.logger.warn(message, meta);
+    }
+
+    error(message, meta) {
+        this.logger.error(message, meta);
+    }
+
+    debug(message, meta) {
+        this.logger.debug(message, meta);
+    }
+}
 // For morgan integration
-logger.stream = {
-    write: (msg) => logger.info(msg.trim()),
+Logger.prototype.stream = {
+    write: (msg) => this.logger.info(msg.trim()),
 };
 
-export default logger;
+export { Logger };
+export default Logger;

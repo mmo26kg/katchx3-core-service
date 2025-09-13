@@ -17,6 +17,14 @@ function defineUserModel(sequelize) {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        phone: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        fullName: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     });
 
     return User;
