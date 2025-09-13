@@ -1,8 +1,7 @@
 import container from './common/helper/di-container.js';
 import Logger from './common/helper/logger.js';
-import { createApp } from './app.js';
+import createApp from './app.js';
 import db from './config/database.js';
-// import UserModule from './modules/user/user.module.js';
 import registerAllModules from './modules/allModules.js';
 
 async function main() {
@@ -11,7 +10,6 @@ async function main() {
         container.registerClass('logger', Logger);
         container.registerFactory('sequelize', db.createSequelize);
         container.registerFactory('app', createApp);
-        // container.register('userModule', () => new UserModule());
         registerAllModules();
 
         // Get dependencies
