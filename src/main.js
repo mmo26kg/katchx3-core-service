@@ -49,7 +49,7 @@ async function main() {
     try {
         // Register dependencies
         container.register('logger', () => new Logger());
-        container.registerFactory('sequelize', () => db.createSequelize());
+        container.registerFactory('sequelize', db.createSequelize);
         container.registerFactory('app', createApp);
         container.register('userModule', () => new UserModule());
 

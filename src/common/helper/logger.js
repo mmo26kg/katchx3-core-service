@@ -55,6 +55,9 @@ class Logger {
                 }),
             ],
         });
+        this.stream = {
+            write: (msg) => this.logger.info(msg.trim()),
+        };
     }
 
     info(message, meta) {
@@ -73,10 +76,5 @@ class Logger {
         this.logger.debug(message, meta);
     }
 }
-// For morgan integration
-Logger.prototype.stream = {
-    write: (msg) => this.logger.info(msg.trim()),
-};
 
-export { Logger };
 export default Logger;
