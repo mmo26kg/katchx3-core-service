@@ -10,6 +10,7 @@ class ModuleConfig extends BaseModuleConfig {
         super({
             singularizedName,
             pluralizedName,
+            modelName: singularizedName,
             tableName: pluralizedName,
             serviceName: `${singularizedName}Service`,
             controllerName: `${singularizedName}Controller`,

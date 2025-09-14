@@ -4,7 +4,7 @@ export default class BaseService {
     constructor(moduleConfig) {
         // this.configAddress = container.get('configAddress');
         this.moduleConfig = moduleConfig;
-        this.modelName = this.moduleConfig.tableName;
+        this.modelName = this.moduleConfig.modelName;
         this.container = container;
         this.logger = this.container.get('logger');
         this._sequelize = null;

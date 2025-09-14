@@ -14,7 +14,7 @@ export function createApp() {
     app.use(express.urlencoded({ extended: true }));
     app.use((req, res, next) => {
         logger.seperate();
-        logger.executeAPI(`➡️  ${req.method} ${req.url} started`);
+        logger.executeAPI(`➡️  ${req.method} ${req.url} ✅ Started`);
         next();
     });
 

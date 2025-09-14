@@ -1,5 +1,6 @@
 export default class BaseModuleConfig {
     constructor({
+        modelName,
         tableName,
         serviceName,
         controllerName,
@@ -8,6 +9,7 @@ export default class BaseModuleConfig {
         basePath,
         schema,
     }) {
+        if (!modelName) throw new Error('BaseModuleConfig requires a modelName');
         if (!tableName) throw new Error('BaseModuleConfig requires a tableName');
         if (!serviceName) throw new Error('BaseModuleConfig requires a serviceName');
         if (!controllerName) throw new Error('BaseModuleConfig requires a controllerName');
@@ -16,6 +18,7 @@ export default class BaseModuleConfig {
         if (!basePath) throw new Error('BaseModuleConfig requires a basePath');
         if (!schema) throw new Error('BaseModuleConfig requires a schema');
 
+        this.modelName = modelName;
         this.tableName = tableName;
         this.serviceName = serviceName;
         this.controllerName = controllerName;
