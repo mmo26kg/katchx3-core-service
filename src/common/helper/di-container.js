@@ -1,5 +1,7 @@
-import { get } from 'http';
-import { type } from 'os';
+function loggerDependencyError(err) {
+    console.error('Dependency error:', err.message);
+    throw err;
+}
 
 const container = {
     dependencies: {},
@@ -18,9 +20,20 @@ const container = {
     },
 
     get(key) {
+        if (!key || typeof key !== 'string') {
+            loggerDependencyError(new Error('Dependency key must be a non-empty string'));
+            throw new Error('Dependency key must be a non-empty string');
+        }
+
         const dep = this.dependencies[key];
         if (!dep) {
-            throw new Error(`Dependency ${key} not found`);
+            const availableKeys = Object.keys(this.dependencies);
+            loggerDependencyError(
+                new Error(
+                    `Dependency [${key}] not found. Available keys are: [${availableKeys.join(', ')}]`
+                )
+            );
+            throw new Error(`Dependency [${key}] not found`);
         }
 
         // Nếu đã có instance cached, trả về
@@ -29,16 +42,25 @@ const container = {
         }
 
         let instance;
+        try {
+            if (dep?.type === 'factory') {
+                // Factory function - invoke và cache result
+                instance = dep.fn();
+            } else if (typeof dep === 'function') {
+                // Function dependency - invoke
+                instance = dep();
+            } else {
+                // Direct value/object
+                instance = dep;
+            }
+        } catch (err) {
+            loggerDependencyError(new Error(`Failed to resolve dependency ${key}: ${err.message}`));
+            throw err;
+        }
 
-        if (dep.type === 'factory') {
-            // Factory function - invoke và cache result
-            instance = dep.fn();
-        } else if (typeof dep === 'function') {
-            // Function dependency - invoke
-            instance = dep();
-        } else {
-            // Direct value/object
-            instance = dep;
+        if (instance === undefined || instance === null) {
+            loggerDependencyError(new Error(`Resolved dependency ${key} is invalid: ${instance}`));
+            throw new Error(`Resolved dependency ${key} is invalid`);
         }
 
         // Cache instance

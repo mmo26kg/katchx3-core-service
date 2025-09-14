@@ -44,11 +44,10 @@ export function createApp() {
     // Load modules if registered (skip silently if DI not ready)
     try {
         const allModules = container.get('allModules');
-        console.log('All Modules:', allModules);
         allModules.forEach((module) => {
             logger.info(`Initializing module ${module.moduleConfig.singularizedName}`);
             module.initApp(app);
-            logger.info(`Module ${module.moduleConfig.singularizedName} initialized`);
+            logger.info(`-> Module ${module.moduleConfig.singularizedName} initialized`);
         });
     } catch (error) {
         logger.error('Failed to initialize modules', error);
