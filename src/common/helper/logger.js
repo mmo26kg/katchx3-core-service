@@ -30,9 +30,9 @@ class Logger {
             error: '❌',
             warn: '⚠️',
             info: 'ℹ️',
-            executeAPI: '🌐',
+            executeAPI: '🛜',
             runService: '🛠️',
-            returnAPI: '✅',
+            returnAPI: '↩️',
             debug: '🔍',
         };
 
@@ -58,7 +58,7 @@ class Logger {
         const metaStr =
             meta && Object.keys(meta).length > 0 ? chalk.dim(JSON.stringify(meta, null, 0)) : '';
 
-        const logLine = `${icon}  ${timestamp} ${levelStr} ${msg} ${metaStr}`;
+        const logLine = `${icon}  ${timestamp} • ${levelStr} • ${msg} ${metaStr}`;
 
         console.log(logLine);
     }
@@ -87,7 +87,7 @@ class Logger {
         this.log('returnAPI', message, meta);
     }
     seperate() {
-        console.log(chalk.gray(`${'-'.repeat(120)}`));
+        console.log(chalk.gray(`${'*'.repeat(80)}`));
     }
 }
 

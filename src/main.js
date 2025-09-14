@@ -3,6 +3,7 @@ import Logger from './common/helper/logger.js';
 import createApp from './app.js';
 import db from './config/database.js';
 import registerAllModules from './modules/allModules.js';
+import defineRelationships from './modules/model.relationship.js';
 
 async function main() {
     try {
@@ -24,10 +25,14 @@ async function main() {
             throw new Error('Sequelize instance is invalid (missing authenticate method)');
         }
 
+        // Initialize modules and relationships
+
         const app = container.get('app');
         if (!app || typeof app.listen !== 'function') {
             throw new Error('App instance is invalid (missing listen method)');
         }
+
+        defineRelationships(sequelize);
 
         // Initialize DB
         await db.testConnection(sequelize, logger);
