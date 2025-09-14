@@ -11,6 +11,11 @@ export default class BaseController {
         this.basePath = this.moduleConfig.basePath;
         this.singularizedName = this.moduleConfig.singularizedName;
         this.pluralizedName = this.moduleConfig.pluralizedName;
+        this.buildOptions = buildOptions;
+        this.ok = ok;
+        this.fail = fail;
+        this.notFound = notFound;
+        this.created = created;
     }
 
     registerCustomRoutes(_router) {
