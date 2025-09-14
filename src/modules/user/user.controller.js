@@ -6,8 +6,6 @@ class UserController extends BaseController {
     constructor(moduleConfig) {
         super(moduleConfig);
     }
-
-    // You can add user-specific controller methods here
     registerCustomRoutes(router) {
         router.get('/active', async (req, res) => {
             try {
