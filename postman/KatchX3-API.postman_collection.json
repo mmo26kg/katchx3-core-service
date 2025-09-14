@@ -1,0 +1,758 @@
+{
+    "info": {
+        "_postman_id": "b0a1f2e3-4455-6677-8899-aabbccddeeff",
+        "name": "KatchX3 API",
+        "description": "Comprehensive Postman collection for KatchX3 Core Service\n\nConventions:\n- Success envelope: { success, data, meta? }\n- Error envelope: { success:false, data:null, message, error? }\n- Health endpoint returns plain text 'OK' (no JSON).\n\nModules Covered:\n- Health checks\n- User module: CRUD, list (pagination/sort/filters), active users, and error scenarios\n- Order module: CRUD, list (pagination/sort/filters), status updates, and error scenarios\n\nTest Scenarios:\n- Happy path flows\n- Validation errors\n- 404 scenarios\n- Field filtering and pagination\n- Module relationships",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global setup: could inject headers, correlation IDs, etc.",
+                    "pm.variables.set('ts', Date.now());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": ["// Global assertions placeholder"]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string",
+            "description": "Base URL for the KatchX3 API"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "description": "Service health checks",
+            "item": [
+                {
+                    "name": "GET /health",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "*/*" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["health"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Body is OK (text)', () => pm.expect(pm.response.text().trim()).to.eql('OK'));",
+                                    "pm.test('Responds quickly', () => pm.expect(pm.response.responseTime).to.be.below(800));"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "description": "User module CRUD and listing",
+            "item": [
+                {
+                    "name": "POST /users (Create)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const ts = Date.now();",
+                                    "pm.variables.set('user_username', `testuser_${ts}`);",
+                                    "pm.variables.set('user_email', `test_${ts}@example.com`);",
+                                    "pm.variables.set('user_password', 'password123');"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has id, username, email', () => {",
+                                    "  pm.expect(json.data).to.have.property('id');",
+                                    "  pm.expect(json.data.username).to.eql(pm.variables.get('user_username'));",
+                                    "  pm.expect(json.data.email).to.eql(pm.variables.get('user_email'));",
+                                    "});",
+                                    "pm.variables.set('user_id', json.data.id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"{{user_username}}\",\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\",\n  \"fullName\": \"Test User\",\n  \"phone\": \"+1234567890\",\n  \"age\": 25\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /users/:id (Get by ID)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{user_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{user_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has required fields', () => { pm.expect(json.data).to.have.property('id'); });"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PUT /users/:id (Update)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"Updated Test User\",\n  \"phone\": \"+9876543210\",\n  \"age\": 30\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{user_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{user_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Fields updated', () => {",
+                                    "  pm.expect(json.data.fullName).to.eql('Updated Test User');",
+                                    "  pm.expect(json.data.phone).to.eql('+9876543210');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /users (List)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users?page=1&pageSize=5&sort=username,-createdAt&fields=id,username,email",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"],
+                            "query": [
+                                { "key": "page", "value": "1" },
+                                { "key": "pageSize", "value": "5" },
+                                { "key": "sort", "value": "username,-createdAt" },
+                                { "key": "fields", "value": "id,username,email" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has rows and count', () => {",
+                                    "  pm.expect(json.data).to.have.property('rows');",
+                                    "  pm.expect(json.data).to.have.property('count');",
+                                    "});",
+                                    "pm.test('Has meta pagination', () => {",
+                                    "  pm.expect(json).to.have.property('meta');",
+                                    "  pm.expect(json.meta).to.have.property('page');",
+                                    "  pm.expect(json.meta).to.have.property('pageSize');",
+                                    "  pm.expect(json.meta).to.have.property('total');",
+                                    "  pm.expect(json.meta).to.have.property('totalPages');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /users?username=... (Filter)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users?username={{user_username}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"],
+                            "query": [{ "key": "username", "value": "{{user_username}}" }]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /users/active (Custom Route)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/active?page=1&pageSize=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "active"],
+                            "query": [
+                                { "key": "page", "value": "1" },
+                                { "key": "pageSize", "value": "10" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Returns active users array', () => {",
+                                    "  pm.expect(json.data).to.be.an('array');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE /users/:id (Delete)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{user_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{user_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true and data=true', () => {",
+                                    "  pm.expect(json.success).to.eql(true);",
+                                    "  pm.expect(json.data).to.eql(true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "description": "Order module CRUD and listing",
+            "item": [
+                {
+                    "name": "POST /orders (Create)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const ts = Date.now();",
+                                    "pm.variables.set('order_number', `ORD-${ts}`);",
+                                    "pm.variables.set('order_user_id', pm.variables.get('user_id') || 1);",
+                                    "pm.variables.set('order_total', '99.99');"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has id, orderNumber, status', () => {",
+                                    "  pm.expect(json.data).to.have.property('id');",
+                                    "  pm.expect(json.data.orderNumber).to.eql(pm.variables.get('order_number'));",
+                                    "  pm.expect(json.data).to.have.property('status');",
+                                    "});",
+                                    "pm.variables.set('order_id', json.data.id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"orderNumber\": \"{{order_number}}\",\n  \"userId\": {{order_user_id}},\n  \"totalAmount\": {{order_total}},\n  \"status\": \"pending\",\n  \"isPaid\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/orders",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders"]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /orders/:id (Get by ID)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/{{order_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "{{order_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has required fields', () => {",
+                                    "  pm.expect(json.data).to.have.property('id');",
+                                    "  pm.expect(json.data).to.have.property('orderNumber');",
+                                    "  pm.expect(json.data).to.have.property('totalAmount');",
+                                    "  pm.expect(json.data).to.have.property('status');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PUT /orders/:id (Update Status)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"completed\",\n  \"isPaid\": true,\n  \"paidAt\": \"2025-09-14T10:00:00.000Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/{{order_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "{{order_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Status updated', () => {",
+                                    "  pm.expect(json.data.status).to.eql('completed');",
+                                    "  pm.expect(json.data.isPaid).to.eql(true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /orders (List)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders?page=1&pageSize=5&sort=-createdAt&fields=id,orderNumber,totalAmount,status",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders"],
+                            "query": [
+                                { "key": "page", "value": "1" },
+                                { "key": "pageSize", "value": "5" },
+                                { "key": "sort", "value": "-createdAt" },
+                                { "key": "fields", "value": "id,orderNumber,totalAmount,status" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));",
+                                    "pm.test('Has rows and count', () => {",
+                                    "  pm.expect(json.data).to.have.property('rows');",
+                                    "  pm.expect(json.data).to.have.property('count');",
+                                    "});",
+                                    "pm.test('Has meta pagination', () => {",
+                                    "  pm.expect(json).to.have.property('meta');",
+                                    "  pm.expect(json.meta).to.have.property('page');",
+                                    "  pm.expect(json.meta).to.have.property('pageSize');",
+                                    "  pm.expect(json.meta).to.have.property('total');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /orders?status=... (Filter by Status)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders?status=pending&userId={{order_user_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders"],
+                            "query": [
+                                { "key": "status", "value": "pending" },
+                                { "key": "userId", "value": "{{order_user_id}}" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true', () => pm.expect(json.success).to.eql(true));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE /orders/:id (Delete)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/{{order_id}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "{{order_id}}"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                                    "pm.test('Envelope success=true and data=true', () => {",
+                                    "  pm.expect(json.success).to.eql(true);",
+                                    "  pm.expect(json.data).to.eql(true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Validation & Error Scenarios",
+            "description": "Test validation and error handling",
+            "item": [
+                {
+                    "name": "POST /users (Invalid Email)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"invaliduser\",\n  \"email\": \"invalid-email\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 400 or 500', () => {",
+                                    "  pm.expect([400, 500]).to.include(pm.response.code);",
+                                    "});",
+                                    "const json = pm.response.json();",
+                                    "pm.test('Envelope success=false', () => pm.expect(json.success).to.eql(false));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "POST /orders (Missing Required Field)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": 1,\n  \"totalAmount\": 50.00\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/orders",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 400 or 500', () => {",
+                                    "  pm.expect([400, 500]).to.include(pm.response.code);",
+                                    "});",
+                                    "const json = pm.response.json();",
+                                    "pm.test('Envelope success=false', () => pm.expect(json.success).to.eql(false));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /users/99999 (404)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                                    "pm.test('Envelope success=false', () => pm.expect(json.success).to.eql(false));",
+                                    "pm.test('Message mentions not found', () => pm.expect(json.message.toLowerCase()).to.include('not found'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GET /orders/99999 (404)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PUT /users/99999 (404)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Updated Name\"\n}" },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PUT /orders/99999 (404)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": { "mode": "raw", "raw": "{\n  \"status\": \"completed\"\n}" },
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE /users/99999 (404)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE /orders/99999 (404)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/99999",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["orders", "99999"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

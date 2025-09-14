@@ -7,14 +7,14 @@ class Controller extends BaseController {
     registerCustomRoutes(router) {
         router.get('/active', async (req, res) => {
             try {
-                const options = buildOptions(req.query);
+                const options = this.buildOptions(req.query);
                 const activeUsers = await this.service.getActiveUsers(options);
-                return ok(activeUsers).send(res);
+                return this.ok(activeUsers).send(res);
             } catch (error) {
                 this.logger.error(`Failed to fetch active ${this.pluralizedName}`, {
                     error: error.message,
                 });
-                return fail(`Failed to fetch active ${this.pluralizedName}`, error).send(res);
+                return this.fail(`Failed to fetch active ${this.pluralizedName}`, error).send(res);
             }
         });
     }
