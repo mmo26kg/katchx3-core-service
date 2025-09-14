@@ -6,6 +6,7 @@ export default class BaseModuleConfig {
         singularizedName,
         pluralizedName,
         basePath,
+        schema,
     }) {
         if (!tableName) throw new Error('BaseModuleConfig requires a tableName');
         if (!serviceName) throw new Error('BaseModuleConfig requires a serviceName');
@@ -13,6 +14,7 @@ export default class BaseModuleConfig {
         if (!singularizedName) throw new Error('BaseModuleConfig requires a singularizedName');
         if (!pluralizedName) throw new Error('BaseModuleConfig requires a pluralizedName');
         if (!basePath) throw new Error('BaseModuleConfig requires a basePath');
+        if (!schema) throw new Error('BaseModuleConfig requires a schema');
 
         this.tableName = tableName;
         this.serviceName = serviceName;
@@ -20,5 +22,6 @@ export default class BaseModuleConfig {
         this.singularizedName = singularizedName;
         this.pluralizedName = pluralizedName;
         this.basePath = basePath;
+        this.schema = schema;
     }
 }

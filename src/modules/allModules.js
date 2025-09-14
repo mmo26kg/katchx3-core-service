@@ -1,8 +1,11 @@
-// import ProductModule from './product/product.module.js';
 import UserModule from './user/user.module.js';
+import OrderModule from './order/order.module.js';
 
 function registerAllModules(container) {
-    container.registerClass('userModule', UserModule);
+    let allModules = [];
+    allModules.push(new UserModule());
+    allModules.push(new OrderModule());
+    container.register('allModules', allModules);
 }
 
 export default registerAllModules;

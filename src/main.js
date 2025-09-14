@@ -9,8 +9,8 @@ async function main() {
         // Register dependencies
         container.registerClass('logger', Logger);
         container.registerFactory('sequelize', db.createSequelize);
-        container.registerFactory('app', createApp);
         registerAllModules(container);
+        container.registerFactory('app', createApp);
 
         // Get dependencies
         const logger = container.get('logger');

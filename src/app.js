@@ -1,6 +1,7 @@
 import express from 'express';
 import container from './common/helper/di-container.js';
 import morgan from 'morgan';
+import e from 'express';
 
 export function createApp() {
     const app = express();
@@ -42,9 +43,16 @@ export function createApp() {
 
     // Load modules if registered (skip silently if DI not ready)
     try {
-        const userModule = container.get('userModule');
-        userModule.initApp(app);
-    } catch {}
+        const allModules = container.get('allModules');
+        console.log('All Modules:', allModules);
+        allModules.forEach((module) => {
+            logger.info(`Initializing module ${module.moduleConfig.singularizedName}`);
+            module.initApp(app);
+            logger.info(`Module ${module.moduleConfig.singularizedName} initialized`);
+        });
+    } catch (error) {
+        logger.error('Failed to initialize modules', error);
+    }
 
     return app;
 }

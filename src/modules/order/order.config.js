@@ -2,43 +2,38 @@ import BaseModuleConfig from '../../common/interface/base.config.js';
 import { DataTypes } from 'sequelize';
 
 const schema = {
-    username: {
+    orderNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
     },
-    email: {
-        type: DataTypes.STRING,
-        validate: { isEmail: true },
-        allowNull: false,
-        unique: true,
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    phone: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    fullName: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    age: {
+    userId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
     },
-    isActive: {
+    totalAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'pending',
+    },
+    isPaid: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: false,
+    },
+    paidAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
     },
 };
 
 class ModuleConfig extends BaseModuleConfig {
     constructor() {
-        const singularizedName = 'user';
-        const pluralizedName = 'users';
+        const singularizedName = 'order';
+        const pluralizedName = 'orders';
         super({
             singularizedName,
             pluralizedName,
