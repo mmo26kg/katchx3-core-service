@@ -1,8 +1,7 @@
 import { DataTypes } from 'sequelize';
-import userModuleConfig from './user.config.js';
 
-function defineUserModel(sequelize) {
-    const User = sequelize.define(userModuleConfig.tableName, {
+function defineUserModel(sequelize, moduleConfig) {
+    const User = sequelize.define(moduleConfig.tableName, {
         username: {
             type: DataTypes.STRING,
             allowNull: false,

@@ -1,9 +1,9 @@
 import container from '../helper/di-container.js';
 
 export default class BaseService {
-    constructor() {
-        this.configAddress = container.get('configAddress');
-        this.moduleConfig = container.get(this.configAddress);
+    constructor(moduleConfig) {
+        // this.configAddress = container.get('configAddress');
+        this.moduleConfig = moduleConfig;
         this.modelName = this.moduleConfig.tableName;
         this.container = container;
         this.logger = this.container.get('logger');

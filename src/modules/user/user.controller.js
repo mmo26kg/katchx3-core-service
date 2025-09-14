@@ -3,8 +3,8 @@ import { ok, fail } from '../../common/helper/api.response.js';
 import buildOptions from '../../common/helper/buildOptions.js';
 
 class UserController extends BaseController {
-    constructor() {
-        super();
+    constructor(moduleConfig) {
+        super(moduleConfig);
     }
 
     // You can add user-specific controller methods here

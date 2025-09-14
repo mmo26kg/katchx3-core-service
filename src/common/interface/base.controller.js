@@ -4,11 +4,10 @@ import { ok, fail, notFound, created } from '../helper/api.response.js';
 import buildOptions from '../helper/buildOptions.js';
 
 export default class BaseController {
-    constructor() {
+    constructor(moduleConfig) {
         this.logger = container.get('logger');
-        this.configAddress = container.get('configAddress');
-        this.moduleConfig = container.get(this.configAddress);
-        this.service = container.get(this.moduleConfig.serviceName);
+        this.moduleConfig = moduleConfig;
+        this.service = container.getWithArgs(this.moduleConfig.serviceName, this.moduleConfig);
         this.basePath = this.moduleConfig.basePath;
         this.singularizedName = this.moduleConfig.singularizedName;
         this.pluralizedName = this.moduleConfig.pluralizedName;

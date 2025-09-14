@@ -5,16 +5,16 @@ import UserController from './user.controller.js';
 import userModuleConfig from './user.config.js';
 class UserModule {
     constructor() {
-        this.configAddress = 'userModuleConfig';
-        container.register('configAddress', this.configAddress);
-        container.register(this.configAddress, userModuleConfig);
         container.registerClass(userModuleConfig.serviceName, UserService);
         container.registerClass(userModuleConfig.controllerName, UserController);
         this.sequelize = container.get('sequelize');
-        this.userController = container.get(userModuleConfig.controllerName);
+        this.userController = container.getWithArgs(
+            userModuleConfig.controllerName,
+            userModuleConfig
+        );
     }
     initApp(app) {
-        defineUserModel(this.sequelize);
+        defineUserModel(this.sequelize, userModuleConfig);
         this.userController.attachRoutes(app);
     }
 }

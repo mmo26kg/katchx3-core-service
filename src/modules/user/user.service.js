@@ -1,9 +1,8 @@
 import BaseService from '../../common/interface/base.service.js';
-import userModuleConfig from './user.config.js';
 
 class UserService extends BaseService {
-    constructor() {
-        super();
+    constructor(moduleConfig) {
+        super(moduleConfig);
     }
 
     async getActiveUsers(options = {}) {
