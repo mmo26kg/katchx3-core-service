@@ -1,6 +1,6 @@
 import BaseModuleConfig from '../../common/interface/base.config.js';
 
-class UserModuleConfig extends BaseModuleConfig {
+class ModuleConfig extends BaseModuleConfig {
     constructor() {
         const singularizedName = 'user';
         const pluralizedName = 'users';
@@ -15,6 +15,6 @@ class UserModuleConfig extends BaseModuleConfig {
     }
 }
 
-const userModuleConfig = new UserModuleConfig();
+const moduleConfig = new ModuleConfig();
 
-export default userModuleConfig;
+export default moduleConfig;

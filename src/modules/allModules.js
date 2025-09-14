@@ -2,7 +2,6 @@
 import UserModule from './user/user.module.js';
 
 function registerAllModules(container) {
-    // container.register('productModule', () => new ProductModule());
     container.registerClass('userModule', UserModule);
 }
 

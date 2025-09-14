@@ -1,21 +1,11 @@
-import container from '../../common/helper/di-container.js';
-import defineUserModel from './user.model.js';
-import UserService from './user.service.js';
-import UserController from './user.controller.js';
-import userModuleConfig from './user.config.js';
-class UserModule {
+import BaseModule from '../../common/interface/base.module.js';
+import moduleConfig from './user.config.js';
+import defineModel from './user.model.js';
+import Service from './user.service.js';
+import Controller from './user.controller.js';
+
+export default class UserModule extends BaseModule {
     constructor() {
-        container.registerClass(userModuleConfig.serviceName, UserService);
-        container.registerClass(userModuleConfig.controllerName, UserController);
-        this.sequelize = container.get('sequelize');
-        this.userController = container.getWithArgs(
-            userModuleConfig.controllerName,
-            userModuleConfig
-        );
-    }
-    initApp(app) {
-        defineUserModel(this.sequelize, userModuleConfig);
-        this.userController.attachRoutes(app);
+        super(defineModel, Service, Controller, moduleConfig);
     }
 }
-export default UserModule;

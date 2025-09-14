@@ -1,6 +1,6 @@
 import BaseService from '../../common/interface/base.service.js';
 
-class UserService extends BaseService {
+class Service extends BaseService {
     constructor(moduleConfig) {
         super(moduleConfig);
     }
@@ -14,4 +14,4 @@ class UserService extends BaseService {
     }
 }
 
-export default UserService;
+export default Service;

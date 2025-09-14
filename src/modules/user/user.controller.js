@@ -2,7 +2,7 @@ import BaseController from '../../common/interface/base.controller.js';
 import { ok, fail } from '../../common/helper/api.response.js';
 import buildOptions from '../../common/helper/buildOptions.js';
 
-class UserController extends BaseController {
+class Controller extends BaseController {
     constructor(moduleConfig) {
         super(moduleConfig);
     }
@@ -22,4 +22,4 @@ class UserController extends BaseController {
     }
 }
 
-export default UserController;
+export default Controller;
