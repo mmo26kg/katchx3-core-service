@@ -13,6 +13,7 @@ export default class BaseService {
     // Lazy resolve sequelize để tránh timing issues
     get sequelize() {
         if (!this._sequelize) this._sequelize = this.container.get('sequelize');
+        if (!this._sequelize) throw new Error('Sequelize instance not found in DI container');
         return this._sequelize;
     }
 
@@ -54,37 +55,93 @@ export default class BaseService {
     // CRUD cơ bản
     async listAndCount(options = {}) {
         this.log('info', `listAndCount ${this.modelName}`, options);
-        return this.model.findAndCountAll(options);
+        try {
+            return await this.model.findAndCountAll(options);
+        } catch (err) {
+            this.log('error', `Error in listAndCount ${this.modelName}: ${err.message}`, {
+                stack: err.stack,
+                options,
+            });
+            throw err;
+        }
     }
 
     async count(options = {}) {
         this.log('info', `count ${this.modelName}`, options);
-        return this.model.count(options);
+        try {
+            return await this.model.count(options);
+        } catch (err) {
+            this.log('error', `Error in count ${this.modelName}: ${err.message}`, {
+                stack: err.stack,
+                options,
+            });
+            throw err;
+        }
     }
 
     async getById(id, options = {}) {
         this.log('info', `getById ${this.modelName} id=${id}`);
-        return this.model.findByPk(id, options);
+        try {
+            return await this.model.findByPk(id, options);
+        } catch (err) {
+            this.log('error', `Error in getById ${this.modelName} id=${id}: ${err.message}`, {
+                stack: err.stack,
+                options,
+            });
+            throw err;
+        }
     }
 
     async create(data, options = {}) {
         this.log('info', `create ${this.modelName}`, data);
-        return this.model.create(data, options);
+        try {
+            return await this.model.create(data, options);
+        } catch (err) {
+            this.log('error', `Error in create ${this.modelName}: ${err.message}`, {
+                stack: err.stack,
+                data,
+                options,
+            });
+            throw err;
+        }
     }
 
     async update(id, data, options = {}) {
         this.log('info', `update ${this.modelName} id=${id}`, data);
-        const item = await this.model.findByPk(id, options);
-        if (!item) {
-            this.log('warn', `${this.modelName} id=${id} not found for update`);
-            return null;
+        try {
+            const item = await this.getById(id);
+            if (!item) {
+                this.log('warn', `update failed: ${this.modelName} id=${id} not found`);
+                return null;
+            }
+            await item.update(data, options);
+            return item;
+        } catch (err) {
+            this.log('error', `Error in update ${this.modelName} id=${id}: ${err.message}`, {
+                stack: err.stack,
+                data,
+                options,
+            });
+            throw err;
         }
-        return item.update(data, options);
     }
 
     async delete(id, options = {}) {
         this.log('info', `delete ${this.modelName} id=${id}`);
-        const count = await this.model.destroy({ where: { id }, ...options });
-        return count > 0;
+        try {
+            const item = await this.getById(id);
+            if (!item) {
+                this.log('warn', `delete failed: ${this.modelName} id=${id} not found`);
+                return null;
+            }
+            await item.destroy(options);
+            return item;
+        } catch (err) {
+            this.log('error', `Error in delete ${this.modelName} id=${id}: ${err.message}`, {
+                stack: err.stack,
+                options,
+            });
+            throw err;
+        }
     }
 }
