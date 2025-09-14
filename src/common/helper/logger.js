@@ -1,79 +1,93 @@
 import { createLogger, format, transports } from 'winston';
 import chalk from 'chalk';
-
-const { combine, timestamp, printf, colorize, errors, json, splat } = format;
-
-const isProd = process.env.NODE_ENV === 'production';
-const level = process.env.LOG_LEVEL || (isProd ? 'info' : 'debug');
-
-// Human-readable console format with chalk highlights (dev only)
-const humanFormat = printf((info) => {
-    const lvlRaw = info[Symbol.for('level')] || info.level; // original level name
-    const { level: lvlColored, message, timestamp: ts, stack, ...meta } = info;
-
-    const tsColored = chalk.gray(ts);
-    let msg = stack || message;
-
-    // Color message by level (level label is already colored by colorize())
-    if (!stack) {
-        switch (lvlRaw) {
-            case 'error':
-                msg = chalk.red(msg);
-                break;
-            case 'warn':
-                msg = chalk.yellow(msg);
-                break;
-            case 'info':
-                msg = chalk.cyan(msg);
-                break;
-            case 'debug':
-            default:
-                msg = chalk.dim(msg);
-        }
-    }
-
-    const extra = Object.keys(meta).length ? ` ${chalk.gray(JSON.stringify(meta))}` : '';
-    return `${tsColored} ${lvlColored}: ${msg}${extra}`;
-});
+import e from 'express';
 
 class Logger {
     constructor() {
-        this.logger = createLogger({
-            level,
-            transports: [
-                new transports.Console({
-                    level,
-                    format: isProd
-                        ? combine(timestamp(), errors({ stack: true }), splat(), json())
-                        : combine(
-                              colorize(),
-                              timestamp(),
-                              errors({ stack: true }),
-                              splat(),
-                              humanFormat
-                          ),
-                }),
-            ],
-        });
+        this.levels = {
+            fatal: 0,
+            error: 1,
+            warn: 2,
+            info: 3,
+            executeAPI: 4,
+            runService: 5,
+            returnAPI: 6,
+            debug: 7,
+        };
+        this.colors = {
+            fatal: chalk.red.bold.bgWhite,
+            error: chalk.red,
+            warn: chalk.yellow,
+            info: chalk.cyan,
+            executeAPI: chalk.blue,
+            runService: chalk.magenta,
+            returnAPI: chalk.green,
+            debug: chalk.gray,
+        };
+
+        this.icons = {
+            fatal: '☠️',
+            error: '❌',
+            warn: '⚠️',
+            info: 'ℹ️',
+            executeAPI: '🌐',
+            runService: '🛠️',
+            returnAPI: '✅',
+            debug: '🔍',
+        };
+
+        const envLevel = process.env.LOG_LEVEL || (isProd ? 'info' : 'debug');
+        this.currentLevel = this.levels[envLevel] !== undefined ? this.levels[envLevel] : 7;
+
         this.stream = {
-            write: (msg) => this.logger.info(msg.trim()),
+            write: (msg) => this.returnAPI(msg.trim()),
         };
     }
+    log(level, message, meta) {
+        const levelPriority = this.levels[level];
+        if (levelPriority === undefined || levelPriority > this.currentLevel) {
+            return;
+        }
 
-    info(message, meta) {
-        this.logger.info(message, meta);
+        const color = this.colors[level] || ((text) => text);
+        const icon = this.icons[level] || '';
+        const timestamp = chalk.gray(new Date().toISOString());
+        const levelStr = color(level.toUpperCase());
+        let msg = message;
+
+        const metaStr =
+            meta && Object.keys(meta).length > 0 ? chalk.dim(JSON.stringify(meta, null, 0)) : '';
+
+        const logLine = `${icon}  ${timestamp} ${levelStr} ${msg} ${metaStr}`;
+
+        console.log(logLine);
     }
-
-    warn(message, meta) {
-        this.logger.warn(message, meta);
+    fatal(message, meta) {
+        this.log('fatal', message, meta);
     }
-
     error(message, meta) {
-        this.logger.error(message, meta);
+        this.log('error', message, meta);
     }
-
+    warn(message, meta) {
+        this.log('warn', message, meta);
+    }
+    info(message, meta) {
+        this.log('info', message, meta);
+    }
     debug(message, meta) {
-        this.logger.debug(message, meta);
+        this.log('debug', message, meta);
+    }
+    executeAPI(message, meta) {
+        this.log('executeAPI', message, meta);
+    }
+    runService(message, meta) {
+        this.log('runService', message, meta);
+    }
+    returnAPI(message, meta) {
+        this.log('returnAPI', message, meta);
+    }
+    seperate() {
+        console.log(chalk.gray(`${'-'.repeat(120)}`));
     }
 }
 

@@ -54,20 +54,16 @@ export default class BaseService {
 
     // CRUD cơ bản
     async listAndCount(options = {}) {
-        this.log('info', `listAndCount ${this.modelName}`, options);
+        this.log('runService', `listAndCount ${this.modelName}`, options);
         try {
             return await this.model.findAndCountAll(options);
         } catch (err) {
-            this.log('error', `Error in listAndCount ${this.modelName}: ${err.message}`, {
-                stack: err.stack,
-                options,
-            });
             throw err;
         }
     }
 
     async count(options = {}) {
-        this.log('info', `count ${this.modelName}`, options);
+        this.log('runService', `count ${this.modelName}`, options);
         try {
             return await this.model.count(options);
         } catch (err) {
@@ -80,34 +76,25 @@ export default class BaseService {
     }
 
     async getById(id, options = {}) {
-        this.log('info', `getById ${this.modelName} id=${id}`);
+        this.log('runService', `getById ${this.modelName} id=${id}`);
         try {
             return await this.model.findByPk(id, options);
         } catch (err) {
-            this.log('error', `Error in getById ${this.modelName} id=${id}: ${err.message}`, {
-                stack: err.stack,
-                options,
-            });
             throw err;
         }
     }
 
     async create(data, options = {}) {
-        this.log('info', `create ${this.modelName}`, data);
+        this.log('runService', `create ${this.modelName}`, data);
         try {
             return await this.model.create(data, options);
         } catch (err) {
-            this.log('error', `Error in create ${this.modelName}: ${err.message}`, {
-                stack: err.stack,
-                data,
-                options,
-            });
             throw err;
         }
     }
 
     async update(id, data, options = {}) {
-        this.log('info', `update ${this.modelName} id=${id}`, data);
+        this.log('runService', `update ${this.modelName} id=${id}`, data);
         try {
             const item = await this.getById(id);
             if (!item) {
@@ -117,17 +104,12 @@ export default class BaseService {
             await item.update(data, options);
             return item;
         } catch (err) {
-            this.log('error', `Error in update ${this.modelName} id=${id}: ${err.message}`, {
-                stack: err.stack,
-                data,
-                options,
-            });
             throw err;
         }
     }
 
     async delete(id, options = {}) {
-        this.log('info', `delete ${this.modelName} id=${id}`);
+        this.log('runService', `delete ${this.modelName} id=${id}`);
         try {
             const item = await this.getById(id);
             if (!item) {
@@ -137,10 +119,6 @@ export default class BaseService {
             await item.destroy(options);
             return item;
         } catch (err) {
-            this.log('error', `Error in delete ${this.modelName} id=${id}: ${err.message}`, {
-                stack: err.stack,
-                options,
-            });
             throw err;
         }
     }

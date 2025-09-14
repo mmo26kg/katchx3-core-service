@@ -1,0 +1,4 @@
+todo list
+- Enhance logging logic, đơn giản hóa lại
+- Bổ sung mối quan hệ giữa các model
+- Làm CLI file để tự động khai báo module mới
