@@ -6,6 +6,9 @@ export default class BaseModuleConfig {
         controllerName,
         singularizedName,
         pluralizedName,
+        camelCaseName,
+        pascalCaseName,
+        snakeCaseName,
         basePath,
         schema,
     }) {
@@ -17,7 +20,13 @@ export default class BaseModuleConfig {
         if (!pluralizedName) throw new Error('BaseModuleConfig requires a pluralizedName');
         if (!basePath) throw new Error('BaseModuleConfig requires a basePath');
         if (!schema) throw new Error('BaseModuleConfig requires a schema');
+        if (!camelCaseName) throw new Error('BaseModuleConfig requires a camelCaseName');
+        if (!pascalCaseName) throw new Error('BaseModuleConfig requires a pascalCaseName');
+        if (!snakeCaseName) throw new Error('BaseModuleConfig requires a snakeCaseName');
 
+        this.camelCaseName = camelCaseName;
+        this.pascalCaseName = pascalCaseName;
+        this.snakeCaseName = snakeCaseName;
         this.modelName = modelName;
         this.tableName = tableName;
         this.serviceName = serviceName;

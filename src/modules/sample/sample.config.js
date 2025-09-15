@@ -7,7 +7,13 @@ class ModuleConfig extends BaseModuleConfig {
     constructor() {
         const singularizedName = 'sample';
         const pluralizedName = 'samples';
+        const camelCaseName = 'sample';
+        const pascalCaseName = 'Sample';
+        const snakeCaseName = 'sample';
         super({
+            camelCaseName,
+            pascalCaseName,
+            snakeCaseName,
             singularizedName,
             pluralizedName,
             modelName: singularizedName,

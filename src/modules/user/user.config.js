@@ -39,13 +39,19 @@ class ModuleConfig extends BaseModuleConfig {
     constructor() {
         const singularizedName = 'user';
         const pluralizedName = 'users';
+        const camelCaseName = 'user';
+        const pascalCaseName = 'User';
+        const snakeCaseName = 'user';
         super({
+            camelCaseName,
+            pascalCaseName,
+            snakeCaseName,
             singularizedName,
             pluralizedName,
-            modelName: singularizedName,
+            modelName: pascalCaseName,
             tableName: pluralizedName,
-            serviceName: `${singularizedName}Service`,
-            controllerName: `${singularizedName}Controller`,
+            serviceName: `${camelCaseName}Service`,
+            controllerName: `${camelCaseName}Controller`,
             basePath: `/${pluralizedName}`,
             schema: schema,
         });

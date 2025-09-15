@@ -34,9 +34,9 @@ export function createApp() {
     try {
         const allModules = container.get('allModules');
         allModules.forEach((module) => {
-            logger.info(`Initializing module ${module.moduleConfig.singularizedName}`);
+            logger.processing(`Initializing module 📦 ${module.moduleConfig.pascalCaseName}.....`);
             module.initApp(app);
-            logger.info(`-> Module ${module.moduleConfig.singularizedName} initialized`);
+            logger.success(`-> Module 📦 ${module.moduleConfig.pascalCaseName} initialized`);
         });
     } catch (error) {
         logger.error('Failed to initialize modules', error);

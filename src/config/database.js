@@ -35,7 +35,7 @@ function createSequelize() {
 async function testConnection(sequelize, logger) {
     try {
         await sequelize.authenticate();
-        logger.info('Database connection has been established successfully.');
+        logger.success('Database connection has been established successfully.');
     } catch (error) {
         logger.error('Unable to connect to the database:', error);
     }
@@ -44,7 +44,7 @@ async function testConnection(sequelize, logger) {
 async function syncModels(sequelize, logger) {
     try {
         await sequelize.sync({ alter: process.env.DB_SYNC_ALTER === 'true' });
-        logger.info('All models were synchronized successfully.');
+        logger.success('All models were synchronized successfully.');
     } catch (error) {
         logger.error('Error synchronizing models:', error);
     }

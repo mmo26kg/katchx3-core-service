@@ -9,16 +9,20 @@ class Logger {
             error: 1,
             warn: 2,
             info: 3,
-            executeAPI: 4,
-            runService: 5,
-            returnAPI: 6,
-            debug: 7,
+            processing: 4,
+            success: 5,
+            executeAPI: 6,
+            runService: 7,
+            returnAPI: 8,
+            debug: 9,
         };
         this.colors = {
             fatal: chalk.red.bold.bgWhite,
             error: chalk.red,
             warn: chalk.yellow,
             info: chalk.cyan,
+            success: chalk.green,
+            processing: chalk.blue,
             executeAPI: chalk.blue,
             runService: chalk.magenta,
             returnAPI: chalk.green,
@@ -30,6 +34,8 @@ class Logger {
             error: '❌',
             warn: '⚠️',
             info: 'ℹ️',
+            success: '✅',
+            processing: '⏳',
             executeAPI: '🛜',
             runService: '🛠️',
             returnAPI: '↩️',
@@ -37,7 +43,7 @@ class Logger {
         };
 
         const envLevel = process.env.LOG_LEVEL || (isProd ? 'info' : 'debug');
-        this.currentLevel = this.levels[envLevel] !== undefined ? this.levels[envLevel] : 7;
+        this.currentLevel = this.levels[envLevel] !== undefined ? this.levels[envLevel] : 9;
 
         this.stream = {
             write: (msg) => this.returnAPI(msg.trim()),
@@ -73,6 +79,12 @@ class Logger {
     }
     info(message, meta) {
         this.log('info', message, meta);
+    }
+    success(message, meta) {
+        this.log('success', message, meta);
+    }
+    processing(message, meta) {
+        this.log('processing', message, meta);
     }
     debug(message, meta) {
         this.log('debug', message, meta);

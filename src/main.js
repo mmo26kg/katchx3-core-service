@@ -42,8 +42,8 @@ async function main() {
         const PORT = process.env.PORT || 3000;
         const BASE_URL = process.env.BASE_URL || 'http://localhost';
         app.listen(PORT, () => {
-            logger.info(`Server is running on port ${PORT}`);
-            logger.info(`Connect to ${BASE_URL}:${PORT}/health to check health`);
+            logger.success(`Server is running on port ${PORT}`);
+            logger.success(`Connect to ${BASE_URL}:${PORT}/health to check health`);
         });
     } catch (error) {
         try {
