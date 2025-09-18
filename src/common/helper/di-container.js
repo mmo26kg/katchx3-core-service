@@ -14,7 +14,9 @@ const container = {
     registerFactory(key, factory) {
         this.dependencies[key] = { type: 'factory', fn: factory };
     },
-
+    registerMiddleware(key, middleware) {
+        this.dependencies[key] = { type: 'middleware', fn: middleware };
+    },
     registerClass(key, ClassDef) {
         this.dependencies[key] = (...args) => new ClassDef(...args);
     },
@@ -46,6 +48,8 @@ const container = {
             if (dep?.type === 'factory') {
                 // Factory function - invoke và cache result
                 instance = dep.fn();
+            } else if (dep?.type === 'middleware') {
+                instance = dep.fn;
             } else if (typeof dep === 'function') {
                 // Function dependency - invoke
                 instance = dep();

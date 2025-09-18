@@ -1,6 +1,4 @@
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-dotenv.config();
 function createSequelize() {
     if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASSWORD) {
         throw new Error(

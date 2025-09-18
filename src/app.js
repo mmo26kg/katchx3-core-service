@@ -39,7 +39,14 @@ export function createApp() {
             logger.success(`-> Module 📦 ${module.moduleConfig.pascalCaseName} initialized`);
         });
     } catch (error) {
-        logger.error('Failed to initialize modules', error);
+        logger.error('Failed to initialize modules', {
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString(),
+            nodeVersion: process.version,
+            platform: process.platform,
+            env: process.env.NODE_ENV || 'development',
+        });
     }
 
     return app;

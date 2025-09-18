@@ -1,9 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import container from './common/helper/di-container.js';
 import Logger from './common/helper/logger.js';
 import createApp from './app.js';
 import db from './config/database.js';
 import registerAllModules from './modules/allModules.js';
 import defineRelationships from './modules/model.relationship.js';
+import authenticate from './common/middleware/authenticate.js';
 
 async function main() {
     try {
@@ -12,6 +15,7 @@ async function main() {
         container.registerFactory('sequelize', db.createSequelize);
         container.registerFactory('allModules', registerAllModules);
         container.registerFactory('app', createApp);
+        container.registerMiddleware('authenticate', authenticate);
 
         // Get dependencies
         const logger = container.get('logger');
@@ -39,8 +43,8 @@ async function main() {
         await db.syncModels(sequelize, logger);
 
         // Start server
-        const PORT = process.env.PORT || 3000;
-        const BASE_URL = process.env.BASE_URL || 'http://localhost';
+        const PORT = process.env.PORT;
+        const BASE_URL = process.env.BASE_URL;
         app.listen(PORT, () => {
             logger.success(`Server is running on port ${PORT}`);
             logger.success(`Connect to ${BASE_URL}:${PORT}/health to check health`);

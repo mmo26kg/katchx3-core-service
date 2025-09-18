@@ -5,6 +5,7 @@ import buildOptions from '../helper/buildOptions.js';
 
 export default class BaseController {
     constructor(moduleConfig) {
+        this.container = container;
         this.logger = container.get('logger');
         this.moduleConfig = moduleConfig;
         this.service = container.getWithArgs(this.moduleConfig.serviceName, this.moduleConfig);
